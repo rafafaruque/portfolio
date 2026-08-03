@@ -534,6 +534,12 @@ button:focus-visible {
   display: block;
 }
 
+.project-image-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, var(--safelight-wash) 0%, var(--rule) 100%);
+}
+
 .project-body {
   padding: var(--space-md);
   display: flex;
@@ -851,6 +857,31 @@ button.photo-frame {
 .article-body {
   max-width: 68ch;
   font-size: 1.12rem;
+}
+
+.about-layout {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+}
+
+.about-photo {
+  width: 280px;
+  flex-shrink: 0;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+@media (max-width: 720px) {
+  .about-layout {
+    flex-direction: column;
+  }
+
+  .about-photo {
+    width: 100%;
+    max-width: 320px;
+  }
 }
 
 .article-body p { margin-bottom: var(--space-sm); }
