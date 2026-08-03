@@ -4,13 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photography — Your Name</title>
+  <title>Rafa Faruque — Photography</title>
   <meta name="description" content="Film photography.">
   <meta name="theme-color" content="#8C2F26">
-  <link rel="icon" href="images/clover.png">
+  <link rel="icon" href="images/favicon.png?v=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=28">
 </head>
 <body>
 
@@ -24,6 +24,7 @@
         <a href="projects.html">Projects</a>
         <a href="photography.html" class="is-active">Photography</a>
         <a href="writing.html">Writing</a>
+        <a href="about.html">About</a>
       </nav>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -33,75 +34,117 @@
 
   <main>
     <div class="page-header container">
-      <p class="label">film photography</p>
+      <!-- <p class="label">film photography</p> -->
       <h1 class="page-title">Photography</h1>
       <p class="page-intro">
-        I started shooting film after finding an old camera I didn't know how to use.
-        There's a patience to it — loading the roll, guessing the light, waiting to see
-        what actually came out — that's hard to get from a phone. Below is a rough
-        contact sheet of recent frames.
+        I picked up an old Canon AE-1 a couple years ago and have since been carrying it with me nearly everywhere I go. Here are some of my favorite rolls!
         <!-- Rewrite this in your own words: what camera(s), what draws you to it, how long you've shot. -->
       </p>
     </div>
 
     <div class="container fade-in" style="margin-bottom: var(--space-2xl);">
-      <p class="label">recent rolls</p>
+      <!-- <p class="label">recent rolls</p> -->
       <div class="contact-sheet">
         <div class="sprockets"></div>
         <div class="photo-grid">
 
-          <!-- Each frame below is a placeholder. To add a real photo, replace the
-               contents of .photo-frame with:
-               <img src="images/photo-01.jpg" alt="Describe the photo" loading="lazy">
-               and update the caption underneath. -->
+          <!-- Each item below is one roll or trip. The .photo-frame button is the
+               cover shot — to add a real cover photo, put an image inside it:
+               <button class="photo-frame" type="button"><img src="images/roll-01-cover.jpg" alt="..." loading="lazy"></button>
+
+               The .roll-gallery holds the REST of that roll's photos — it's hidden
+               on the page itself and only shown in the popup when the cover is
+               clicked. Add one <div class="photo-frame"><img ...></div> per extra
+               shot. Leave it empty (or delete it) if a roll is just one photo. -->
 
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">01</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">01</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+              <div class="photo-frame"><span class="frame-number">3</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">02</span></div>
-            <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <button class="photo-frame" type="button"><span class="frame-number">02</span></button>
+            <p class="photo-caption">Banff, CA — Canon AE-1, Fujifilm 200</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">03</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">03</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+              <div class="photo-frame"><span class="frame-number">3</span></div>
+              <div class="photo-frame"><span class="frame-number">4</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">04</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">04</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">05</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">05</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+              <div class="photo-frame"><span class="frame-number">3</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">06</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">06</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">07</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">07</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+              <div class="photo-frame"><span class="frame-number">3</span></div>
+            </div>
           </div>
           <div class="photo-item">
-            <div class="photo-frame"><span class="frame-number">08</span></div>
+            <button class="photo-frame" type="button"><span class="frame-number">08</span></button>
             <p class="photo-caption">[Location] — [Camera], [Film stock]</p>
+            <div class="roll-gallery" hidden>
+              <div class="photo-frame"><span class="frame-number">1</span></div>
+              <div class="photo-frame"><span class="frame-number">2</span></div>
+            </div>
           </div>
 
         </div>
         <div class="sprockets"></div>
       </div>
     </div>
+
+    <div class="lightbox" id="lightbox" hidden>
+      <button class="lightbox-backdrop" data-close aria-label="Close"></button>
+      <div class="lightbox-panel" role="dialog" aria-modal="true">
+        <button class="lightbox-close" data-close aria-label="Close">✕</button>
+        <p class="lightbox-caption"></p>
+        <div class="lightbox-grid"></div>
+      </div>
+    </div>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>&copy; 2026 Your Name.</p>
-      <div class="footer-links">
-        <a href="https://github.com/yourusername">GitHub</a>
-        <a href="https://linkedin.com/in/yourusername">LinkedIn</a>
-        <a href="mailto:your.email@example.com">Email</a>
-      </div>
+      <p>&copy; 2026 Rafa Faruque.</p>
     </div>
   </footer>
 

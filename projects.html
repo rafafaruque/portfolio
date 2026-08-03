@@ -4,13 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projects — Your Name</title>
+  <title>Rafa Faruque — Projects</title>
   <meta name="description" content="Software engineering experience and projects.">
   <meta name="theme-color" content="#8C2F26">
-  <link rel="icon" href="images/clover.png">
+  <link rel="icon" href="images/favicon.png?v=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=26">
 </head>
 <body>
 
@@ -24,6 +24,7 @@
         <a href="projects.html" class="is-active">Projects</a>
         <a href="photography.html">Photography</a>
         <a href="writing.html">Writing</a>
+        <a href="about.html">About</a>
       </nav>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -33,120 +34,116 @@
 
   <main>
     <div class="page-header container">
-      <p class="label">software engineering</p>
+      <!-- <p class="label">software engineering</p> -->
       <h1 class="page-title">Projects</h1>
       <p class="page-intro">
-        A running record of what I've worked on — day job and otherwise.
-        <!-- Rewrite this intro in your own voice. -->
+        fun side projects i've built over the past few years
       </p>
     </div>
 
-    <section class="container fade-in" style="margin-bottom: var(--space-xl);">
-      <p class="label">experience</p>
-      <!-- Replace with your real roles. Keep reverse-chronological order. -->
-      <div class="experience-list">
-        <div class="experience-item">
-          <p class="experience-date">2024 — now</p>
-          <div>
-            <p class="experience-role">Software Engineer</p>
-            <p class="experience-org">Company Name</p>
-            <p class="experience-desc">One or two sentences on what you actually did — the systems you owned, the scale you worked at, an outcome you can point to.</p>
+    <section class="container fade-in" style="margin-bottom: var(--space-2xl);">
+      <!-- <p class="label">selected work</p> -->
+      <div class="project-grid">
+        <div class="project-card">
+          <img class="project-image" src="images/project-tiv-archive.jpg" alt="Pixel-art illustration of a tornado in a field">
+          <div class="project-body">
+            <h3 class="project-title">TIV-archive</h3>
+            <!-- Tags TBD -->
+            <div class="project-tags"></div>
+            <p class="project-desc">An interactive map of historic U.S. tornadoes — search a city, see every twister within range, and click one for its EF rating, path length, fatalities, and an animated path. A timeline slider replays tornado history from NOAA's database.</p>
+            <!-- Link TBD -->
           </div>
         </div>
-        <div class="experience-item">
-          <p class="experience-date">2021 — 2024</p>
-          <div>
-            <p class="experience-role">Software Engineer</p>
-            <p class="experience-org">Previous Company</p>
-            <p class="experience-desc">Same idea — what you built, who it was for, and why it mattered. Specifics beat adjectives.</p>
+        <div class="project-card">
+          <div class="project-body">
+            <h3 class="project-title">LetterboxdWrapped</h3>
+            <div class="project-tags">
+              <span class="tag">React</span>
+              <span class="tag">Python</span>
+              <span class="tag">TMDB API</span>
+            </div>
+            <p class="project-desc">A personalized movie analytics and recommendation platform built from Letterboxd viewing and review data.</p>
+            <!-- Link TBD -->
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="container fade-in" style="margin-bottom: var(--space-xl);">
-      <p class="label">skills</p>
-      <!-- Swap these tags for your actual stack. -->
-      <div class="skills-grid">
-        <div>
-          <p class="skill-group-title">languages</p>
-          <div class="tag-list">
-            <span class="tag">JavaScript</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">Python</span>
-            <span class="tag">Go</span>
+        <div class="project-card">
+          <div class="project-body">
+            <h3 class="project-title">Filmlogical</h3>
+            <div class="project-tags">
+              <span class="tag">Instagram</span>
+              <span class="tag">Photoshop</span>
+              <span class="tag">Premiere Pro</span>
+            </div>
+            <p class="project-desc">A film publication I founded and grew to 1.2k+ followers, publishing original film criticism and editorial content.</p>
+            <!-- Link TBD -->
           </div>
         </div>
-        <div>
-          <p class="skill-group-title">frameworks</p>
-          <div class="tag-list">
-            <span class="tag">React</span>
-            <span class="tag">Node.js</span>
-            <span class="tag">Django</span>
+        <div class="project-card">
+          <div class="project-body">
+            <h3 class="project-title">Venture Pipeline Tracker</h3>
+            <div class="project-tags">
+              <span class="tag">Airtable AI</span>
+              <span class="tag">JavaScript</span>
+            </div>
+            <p class="project-desc">AI-powered internal sourcing platform with dashboards and investment pipeline analytics for a $1M+ student-run VC. (Private/internal tool — no public link.)</p>
           </div>
         </div>
-        <div>
-          <p class="skill-group-title">tools</p>
-          <div class="tag-list">
-            <span class="tag">Docker</span>
-            <span class="tag">PostgreSQL</span>
-            <span class="tag">AWS</span>
-            <span class="tag">Git</span>
+        <div class="project-card">
+          <div class="project-body">
+            <h3 class="project-title">This Website</h3>
+            <div class="project-tags">
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">JavaScript</span>
+            </div>
+            <p class="project-desc">The site you're looking at — hand-built with no framework and deployed on GitHub Pages.</p>
+            <!-- Link TBD -->
           </div>
         </div>
       </div>
     </section>
 
     <section class="container fade-in" style="margin-bottom: var(--space-2xl);">
-      <p class="label">selected work</p>
-      <!-- Replace these four with your real projects. Keep the card shape: title, tags, one description, links. -->
-      <div class="project-grid">
-        <div class="project-card">
-          <h3 class="project-title">Order Management Dashboard</h3>
-          <div class="project-tags">
-            <span class="tag">React</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">PostgreSQL</span>
-          </div>
-          <p class="project-desc">An internal tool that replaced a spreadsheet-based workflow for tracking orders end to end. Describe the problem and your specific contribution here.</p>
-          <div class="project-links">
-            <a href="#" class="text-link">Code</a>
-            <a href="#" class="text-link">Demo</a>
-          </div>
-        </div>
-        <div class="project-card">
-          <h3 class="project-title">changelog-bot</h3>
-          <div class="project-tags">
+      <p class="label">skills</p>
+      <div class="skills-grid">
+        <div>
+          <p class="skill-group-title">languages</p>
+          <div class="tag-list">
+            <span class="tag">Java</span>
             <span class="tag">Python</span>
-            <span class="tag">GitHub Actions</span>
-          </div>
-          <p class="project-desc">A GitHub Action that turns merged pull request titles into a formatted changelog on every release. What made this worth building?</p>
-          <div class="project-links">
-            <a href="#" class="text-link">Code</a>
-          </div>
-        </div>
-        <div class="project-card">
-          <h3 class="project-title">Film Roll Log</h3>
-          <div class="project-tags">
-            <span class="tag">Next.js</span>
-            <span class="tag">SQLite</span>
-          </div>
-          <p class="project-desc">A small app for tracking which film stock is loaded in which camera, so I stop forgetting mid-roll. A nice place to mention a side project that isn't just work.</p>
-          <div class="project-links">
-            <a href="#" class="text-link">Code</a>
-            <a href="#" class="text-link">Demo</a>
-          </div>
-        </div>
-        <div class="project-card">
-          <h3 class="project-title">This Website</h3>
-          <div class="project-tags">
-            <span class="tag">HTML</span>
-            <span class="tag">CSS</span>
+            <span class="tag">PHP/Hack</span>
+            <span class="tag">OCaml</span>
+            <span class="tag">C/C++</span>
+            <span class="tag">SQL</span>
             <span class="tag">JavaScript</span>
+            <span class="tag">HTML/CSS</span>
+            <span class="tag">R</span>
           </div>
-          <p class="project-desc">The site you're looking at — hand-built with no framework and deployed on GitHub Pages. Worth keeping on the list; it's still a real project.</p>
-          <div class="project-links">
-            <a href="https://github.com/yourusername/your-repo" class="text-link">Code</a>
+        </div>
+        <div>
+          <p class="skill-group-title">frameworks</p>
+          <div class="tag-list">
+            <span class="tag">GraphQL</span>
+            <span class="tag">GraphAPI</span>
+            <span class="tag">React</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">WordPress</span>
+            <span class="tag">Material-UI</span>
+            <span class="tag">Django</span>
+            <span class="tag">FastAPI</span>
+          </div>
+        </div>
+        <div>
+          <p class="skill-group-title">tools</p>
+          <div class="tag-list">
+            <span class="tag">Git</span>
+            <span class="tag">Gatekeeper</span>
+            <span class="tag">Scuba</span>
+            <span class="tag">Azure</span>
+            <span class="tag">GCP</span>
+            <span class="tag">VS Code</span>
+            <span class="tag">IntelliJ</span>
+            <span class="tag">Eclipse</span>
           </div>
         </div>
       </div>
@@ -155,12 +152,7 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>&copy; 2026 Your Name.</p>
-      <div class="footer-links">
-        <a href="https://github.com/yourusername">GitHub</a>
-        <a href="https://linkedin.com/in/yourusername">LinkedIn</a>
-        <a href="mailto:your.email@example.com">Email</a>
-      </div>
+      <p>&copy; 2026 Rafa Faruque.</p>
     </div>
   </footer>
 
