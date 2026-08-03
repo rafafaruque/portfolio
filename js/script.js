@@ -27,9 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxCaption = lightbox.querySelector('.lightbox-caption');
 
     const openLightbox = (photoItem) => {
+      const cover = photoItem.querySelector(':scope > .photo-frame');
       const gallery = photoItem.querySelector('.roll-gallery');
       const caption = photoItem.querySelector('.photo-caption');
-      lightboxGrid.innerHTML = gallery ? gallery.innerHTML : '';
+      const coverHTML = cover ? `<div class="photo-frame">${cover.innerHTML}</div>` : '';
+      lightboxGrid.innerHTML = coverHTML + (gallery ? gallery.innerHTML : '');
       lightboxCaption.textContent = caption ? caption.textContent : '';
       lightbox.hidden = false;
       document.body.style.overflow = 'hidden';
@@ -48,8 +50,34 @@ document.addEventListener('DOMContentLoaded', () => {
       el.addEventListener('click', closeLightbox);
     });
 
+    // Click a thumbnail inside the popup to see it full size, uncropped —
+    // handy for vertical shots that get cropped in the fixed 3:2 grid.
+    const zoom = document.getElementById('photo-zoom');
+    const zoomImg = document.getElementById('photo-zoom-img');
+    const openZoom = (img) => {
+      zoomImg.src = img.currentSrc || img.src;
+      zoomImg.alt = img.alt || '';
+      zoom.hidden = false;
+    };
+    const closeZoom = () => {
+      zoom.hidden = true;
+      zoomImg.src = '';
+    };
+
+    lightboxGrid.addEventListener('click', (e) => {
+      const frame = e.target.closest('.photo-frame');
+      const img = frame && frame.querySelector('img');
+      if (img) openZoom(img);
+    });
+
+    zoom.querySelectorAll('[data-zoom-close]').forEach((el) => {
+      el.addEventListener('click', closeZoom);
+    });
+
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+      if (e.key !== 'Escape') return;
+      if (!zoom.hidden) closeZoom();
+      else if (!lightbox.hidden) closeLightbox();
     });
   }
 
