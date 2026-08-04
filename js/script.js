@@ -20,38 +20,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Photo roll lightbox — clicking a cover shows the rest of that roll
-  const lightbox = document.getElementById('lightbox');
-  if (lightbox) {
-    const lightboxGrid = lightbox.querySelector('.lightbox-grid');
-    const lightboxCaption = lightbox.querySelector('.lightbox-caption');
-
-    const openLightbox = (photoItem) => {
-      const cover = photoItem.querySelector(':scope > .photo-frame');
-      const gallery = photoItem.querySelector('.roll-gallery');
-      const caption = photoItem.querySelector('.photo-caption');
-      const coverHTML = cover ? `<div class="photo-frame">${cover.innerHTML}</div>` : '';
-      lightboxGrid.innerHTML = coverHTML + (gallery ? gallery.innerHTML : '');
-      lightboxCaption.textContent = caption ? caption.textContent : '';
-      lightbox.hidden = false;
-      document.body.style.overflow = 'hidden';
-    };
-
-    const closeLightbox = () => {
-      lightbox.hidden = true;
-      document.body.style.overflow = '';
+  // Photo roll — clicking a cover expands its .roll-gallery inline, right
+  // in the contact sheet (an accordion, not a popup). Everything flows in
+  // one continuous grid, so expanding a roll never leaves gaps — whatever
+  // comes next just flows up to fill the leftover slots.
+  const contactSheet = document.querySelector('.contact-sheet');
+  const photoGrid = document.querySelector('.photo-grid');
+  if (contactSheet && photoGrid) {
+    // The sprocket-dot divider between rows can't be a real grid item
+    // (a full-width item would force an empty row wherever the current
+    // row isn't completely full, right when a roll is expanded). Instead
+    // we measure where each row actually falls after every layout change
+    // and lay dividers on top, positioned to match.
+    const updateRowDividers = () => {
+      photoGrid.querySelectorAll(':scope > .row-divider').forEach((el) => el.remove());
+      const cells = photoGrid.querySelectorAll('.photo-item, .roll-gallery:not([hidden]) > .photo-frame');
+      const rows = [];
+      cells.forEach((cell) => {
+        const top = cell.offsetTop;
+        let row = rows.find((r) => Math.abs(r.top - top) < 1);
+        if (!row) {
+          row = { top, bottom: top + cell.offsetHeight };
+          rows.push(row);
+        } else {
+          row.bottom = Math.max(row.bottom, top + cell.offsetHeight);
+        }
+      });
+      rows.sort((a, b) => a.top - b.top);
+      for (let i = 0; i < rows.length - 1; i++) {
+        const gapMid = (rows[i].bottom + rows[i + 1].top) / 2;
+        const divider = document.createElement('div');
+        divider.className = 'row-divider';
+        divider.style.top = `${gapMid - 7}px`;
+        photoGrid.appendChild(divider);
+      }
     };
 
     document.querySelectorAll('.photo-item > .photo-frame').forEach((frame) => {
-      frame.addEventListener('click', () => openLightbox(frame.closest('.photo-item')));
+      frame.addEventListener('click', () => {
+        const gallery = frame.closest('.photo-item').nextElementSibling;
+        if (gallery && gallery.classList.contains('roll-gallery')) {
+          gallery.hidden = !gallery.hidden;
+          updateRowDividers();
+        }
+      });
     });
 
-    lightbox.querySelectorAll('[data-close]').forEach((el) => {
-      el.addEventListener('click', closeLightbox);
-    });
-
-    // Click a thumbnail inside the popup to see it full size, uncropped —
-    // handy for vertical shots that get cropped in the fixed 3:2 grid.
+    // Click a thumbnail inside an expanded roll to see it full size,
+    // uncropped — handy for vertical shots that get cropped in the
+    // fixed 3:2 grid.
     const zoom = document.getElementById('photo-zoom');
     const zoomImg = document.getElementById('photo-zoom-img');
     const openZoom = (img) => {
@@ -64,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
       zoomImg.src = '';
     };
 
-    lightboxGrid.addEventListener('click', (e) => {
-      const frame = e.target.closest('.photo-frame');
+    contactSheet.addEventListener('click', (e) => {
+      const frame = e.target.closest('.roll-gallery .photo-frame');
       const img = frame && frame.querySelector('img');
       if (img) openZoom(img);
     });
@@ -75,9 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape') return;
-      if (!zoom.hidden) closeZoom();
-      else if (!lightbox.hidden) closeLightbox();
+      if (e.key === 'Escape' && !zoom.hidden) closeZoom();
+    });
+
+    updateRowDividers();
+    let rowDividerResizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(rowDividerResizeTimer);
+      rowDividerResizeTimer = setTimeout(updateRowDividers, 150);
     });
   }
 

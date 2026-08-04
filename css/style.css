@@ -585,6 +585,7 @@ button:focus-visible {
 }
 
 .sprockets {
+  grid-column: 1 / -1;
   height: 14px;
   background-image: radial-gradient(circle, var(--paper) 2.5px, transparent 3px);
   background-size: 22px 14px;
@@ -593,10 +594,24 @@ button:focus-visible {
 }
 
 .photo-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 3px;
+  column-gap: 3px;
+  row-gap: 18px;
   padding: 3px;
+}
+
+.row-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-image: radial-gradient(circle, var(--paper) 2.5px, transparent 3px);
+  background-size: 22px 14px;
+  background-repeat: repeat-x;
+  background-position: center;
+  pointer-events: none;
 }
 
 .photo-item {
@@ -650,86 +665,24 @@ button.photo-frame {
 }
 
 /* ============================================================
-   Photo roll lightbox — opens when a contact-sheet cover
-   (a roll or a trip) is clicked, showing the rest of that roll.
+   Photo roll — clicking a cover expands its .roll-gallery inline,
+   right in the contact sheet, pushing the rows below it down.
    ============================================================ */
 
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-md);
-}
-
-.lightbox[hidden] {
-  display: none;
-}
-
-.lightbox-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(33, 29, 25, 0.85);
-  border: none;
-  padding: 0;
-}
-
-.lightbox-panel {
-  position: relative;
-  z-index: 1;
-  background: #E8EEEA;
-  border-radius: var(--radius);
-  padding: var(--space-md);
-  max-width: 720px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-}
-
-.lightbox-close {
-  position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 50%;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  line-height: 1;
-  color: var(--ink);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-
-.lightbox-close:hover {
-  background: var(--safelight);
-  color: var(--paper);
-}
-
-.lightbox-caption {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  color: var(--ink-muted);
-  margin-bottom: var(--space-sm);
-  padding-right: var(--space-lg);
-}
-
-.lightbox-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 3px;
-}
-
-.lightbox-grid .photo-frame {
-  cursor: zoom-in;
-}
-
 .roll-gallery {
+  /* display:contents "dissolves" this wrapper — its .photo-frame children
+     become regular items of the parent .photo-grid itself, so they flow
+     right after the clicked cover (filling the rest of that row, then
+     wrapping) instead of forcing a whole new full-width row. */
+  display: contents;
+}
+
+.roll-gallery[hidden] {
   display: none;
+}
+
+.roll-gallery .photo-frame {
+  cursor: zoom-in;
 }
 
 /* ============================================================
