@@ -109,11 +109,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // the click, rather than actually breaking site navigation.
   (() => {
     const CAT_VARIANTS = {
-      orange: { src: 'images/cat-orange.png', swatch: '#E18732' },
-      beige: { src: 'images/cat-beige.png', swatch: '#CAAF8C' },
-      black: { src: 'images/cat-black.png', swatch: '#2E2A26' },
-      green: { src: 'images/cat-green.png', swatch: '#C7D1B0' },
+      orange: {
+        frames: ['images/cat-orange-walk1.png', 'images/cat-orange-walk2.png', 'images/cat-orange-walk3.png', 'images/cat-orange-walk4.png'],
+        swatch: '#E18732',
+      },
+      beige: {
+        frames: ['images/cat-beige-walk1.png', 'images/cat-beige-walk2.png', 'images/cat-beige-walk3.png', 'images/cat-beige-walk4.png'],
+        swatch: '#CAAF8C',
+      },
+      black: {
+        frames: ['images/cat-black-walk1.png', 'images/cat-black-walk2.png', 'images/cat-black-walk3.png', 'images/cat-black-walk4.png'],
+        swatch: '#2E2A26',
+      },
+      green: {
+        frames: ['images/cat-green-walk1.png', 'images/cat-green-walk2.png', 'images/cat-green-walk3.png', 'images/cat-green-walk4.png'],
+        swatch: '#C7D1B0',
+      },
     };
+
+    // Preload every frame of every color so switching variants or
+    // advancing the walk cycle never shows a blank/flickering frame.
+    Object.values(CAT_VARIANTS).forEach((v) => v.frames.forEach((src) => { new Image().src = src; }));
 
     const main = document.querySelector('main');
     if (!main) return;
@@ -131,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cat.className = 'cat-sprite';
     cat.setAttribute('aria-label', 'Cat companion');
     cat.innerHTML = `
-      <img src="images/cat-green.png" alt="" draggable="false">
+      <img src="images/cat-green-walk1.png" alt="" draggable="false">
       <span class="cat-hint">click anywhere to move me!</span>
     `;
 
@@ -159,10 +175,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let jumping = false;
     let lastTime = null;
 
+    // Walk-cycle animation — each color has 4 leg-frame images (cat-{color}-walk1..4.png).
+    // We step through them while the cat is actually moving (pacing or jumping to a
+    // click), and hold on the current frame when still.
+    let currentCatKey = 'green';
+    let walkFrame = 0;
+    let walkTimer = 0;
+    const FRAME_INTERVAL = 0.11; // seconds per leg frame while pacing
+
+    const setWalkFrame = (idx) => {
+      walkFrame = idx;
+      catImg.src = CAT_VARIANTS[currentCatKey].frames[walkFrame];
+    };
+
     const applyVariant = (key) => {
-      const v = CAT_VARIANTS[key] || CAT_VARIANTS.green;
-      catImg.src = v.src;
-      swatchButtons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.cat === key));
+      currentCatKey = CAT_VARIANTS[key] ? key : 'green';
+      setWalkFrame(walkFrame);
+      swatchButtons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.cat === currentCatKey));
     };
     applyVariant(localStorage.getItem('catVariant') || 'green');
 
@@ -200,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
         x = startX + dx * ease;
         y = startY + dy * ease - Math.sin(t * Math.PI) * arc;
+        const frame = Math.min(3, Math.floor(t * 4));
+        if (frame !== walkFrame) setWalkFrame(frame);
         render();
         if (t < 1) {
           requestAnimationFrame(animateJump);
@@ -295,6 +326,11 @@ document.addEventListener('DOMContentLoaded', () => {
         x += dir * speed * dt;
         if (x <= bounds.min) { x = bounds.min; dir = 1; }
         if (x >= bounds.max) { x = bounds.max; dir = -1; }
+        walkTimer += dt;
+        if (walkTimer >= FRAME_INTERVAL) {
+          walkTimer -= FRAME_INTERVAL;
+          setWalkFrame((walkFrame + 1) % 4);
+        }
         render();
       } else {
         lastTime = null;
