@@ -895,8 +895,9 @@ button.photo-frame {
 
 /* ============================================================
    Cat companion — a small easter egg. It wanders the whole page
-   (header and footer included) and hops wherever you click. Real
-   links/buttons underneath still work (script.js forwards clicks).
+   (header and footer included) and teleports wherever you click.
+   Real links/buttons underneath still work (script.js leaves
+   those clicks alone instead of moving the cat).
    ============================================================ */
 
 .cat-lane {
@@ -963,6 +964,10 @@ button.photo-frame {
   transition: opacity var(--transition);
 }
 
+.cat-controls[hidden] {
+  display: none;
+}
+
 .cat-controls:hover {
   opacity: 1;
 }
@@ -986,6 +991,45 @@ button.photo-frame {
 
 .cat-swatch.is-active {
   border-color: var(--ink);
+}
+
+.cat-activate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 32px;
+  margin-left: var(--space-sm);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.cat-activate img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+}
+
+.cat-activate:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.cat-activate[hidden] {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .cat-activate {
+    margin-left: 0;
+    margin-top: var(--space-2xs);
+  }
 }
 
 /* ============================================================
