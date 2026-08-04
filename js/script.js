@@ -137,8 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const CAT_W = 42;
     const CAT_H = 28;
-    const WANDER_MIN_DELAY = 2500;
-    const WANDER_MAX_DELAY = 6500;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const lane = document.createElement('div');
@@ -154,7 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     lane.appendChild(cat);
-    main.appendChild(lane);
+    // Attached to <body>, not <main>, so the cat can roam the whole page —
+    // header and footer included — not just the main content area.
+    document.body.appendChild(lane);
 
     const controls = document.createElement('div');
     controls.className = 'cat-controls';
@@ -169,13 +169,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const hint = cat.querySelector('.cat-hint');
     const swatchButtons = Array.from(controls.querySelectorAll('.cat-swatch'));
 
-    let laneWidth = 0;
-    let laneHeight = 0;
+    let pageWidth = 0;
+    let pageHeight = 0;
     let x = 20;
     let y = 20;
+    let obstacles = []; // padded {top,bottom,left,right} rects (document coords) to stay off of
     let dir = 1;
-    let jumping = false;
-    let wanderTimerId = null;
+    let jumping = false; // true only during the little in-place bounce (self-click)
+    let walking = false; // true while actually traveling to a new spot
+    let walkToken = 0; // bumped whenever a walk is cancelled (teleport/new walk), so stale rAF loops know to stop
+    const WALK_SPEED = 70; // px/sec
+    const FRAME_INTERVAL = 0.14; // seconds per leg frame while walking
 
     // Walk-cycle animation — each color has 4 leg-frame images (cat-{color}-walk1..4.png).
     // We step through them while the cat is actually jumping to a new spot,
@@ -216,9 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const startY = y;
       const dx = targetX - startX;
       const dy = targetY - startY;
-      const duration = 420;
-      const start = performance.now();
       const dist = Math.hypot(dx, dy);
+      if (dist > 1) dir = dx < 0 ? -1 : 1;
+      const duration = Math.min(900, Math.max(320, dist * 0.5));
+      const start = performance.now();
       const arc = Math.max(24, dist * 0.25);
 
       const animateJump = (now) => {
@@ -242,48 +247,228 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(animateJump);
     };
 
-    const goToPoint = (targetX, targetY) => {
-      const clampedX = Math.min(Math.max(targetX - CAT_W / 2, 8), Math.max(8, laneWidth - CAT_W - 8));
-      const clampedY = Math.min(Math.max(targetY - CAT_H / 2, 8), Math.max(8, laneHeight - CAT_H - 8));
-      dir = clampedX < x ? -1 : 1;
-      jumpTo(clampedX, clampedY);
+    // Actually walk (ground-level, legs cycling the whole way) from wherever
+    // the cat is to a target point, instead of arcing through the air. Every
+    // walk carries a token so a later teleport/new walk can tell this one's
+    // rAF loop to stop touching x/y instead of fighting over the position.
+    const walkTo = (targetX, targetY, onDone) => {
+      const myToken = ++walkToken;
+      if (reduceMotion) {
+        x = targetX;
+        y = targetY;
+        render();
+        if (onDone) onDone();
+        return;
+      }
+      const startX = x;
+      const startY = y;
+      const dx = targetX - startX;
+      const dy = targetY - startY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 1) {
+        if (onDone) onDone();
+        return;
+      }
+      walking = true;
+      dir = dx < 0 ? -1 : 1;
+      const duration = Math.max(260, (dist / WALK_SPEED) * 1000);
+      const start = performance.now();
+      let lastNow = start;
+      let frameTimer = 0;
+
+      const animateWalk = (now) => {
+        if (myToken !== walkToken) return; // cancelled — a teleport or newer walk took over
+        const t = Math.min((now - start) / duration, 1);
+        x = startX + dx * t;
+        y = startY + dy * t;
+        frameTimer += (now - lastNow) / 1000;
+        lastNow = now;
+        if (frameTimer >= FRAME_INTERVAL) {
+          frameTimer -= FRAME_INTERVAL;
+          setWalkFrame((walkFrame + 1) % 4);
+        }
+        render();
+        if (t < 1) {
+          requestAnimationFrame(animateWalk);
+        } else {
+          x = targetX;
+          y = targetY;
+          walking = false;
+          render();
+          if (onDone) onDone();
+        }
+      };
+      requestAnimationFrame(animateWalk);
     };
 
-    // Sporadic wandering — instead of pacing back and forth in one small
-    // spot, the cat hops to a random point anywhere in the content area
-    // every few seconds when nothing else is telling it where to go.
-    const scheduleWander = () => {
-      if (reduceMotion) return;
-      clearTimeout(wanderTimerId);
-      const delay = WANDER_MIN_DELAY + Math.random() * (WANDER_MAX_DELAY - WANDER_MIN_DELAY);
-      wanderTimerId = setTimeout(() => {
-        if (!jumping) {
-          const targetX = 8 + Math.random() * Math.max(8, laneWidth - CAT_W - 16);
-          const targetY = 8 + Math.random() * Math.max(8, laneHeight - CAT_H - 16);
-          dir = targetX < x ? -1 : 1;
-          jumpTo(targetX, targetY);
+    // Obstacles the cat should stay off of: anything actually visible —
+    // images/icons, or elements with text sitting directly inside them (not
+    // just inherited from children, so a paragraph mixing plain text with
+    // inline links/code is covered by one rect), plus interactive controls
+    // (nav links, buttons) since those are graphics too. Pure layout
+    // wrapper divs/sections are skipped, and each rect gets a little
+    // padding so the cat keeps a small distance rather than brushing edges.
+    const OBSTACLE_PAD = 12;
+    const hasOwnText = (el) => Array.from(el.childNodes).some(
+      (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim()
+    );
+    const isObstacleEl = (el) => {
+      // SVG elements keep their lowercase tag name (unlike HTML elements).
+      const tag = el.tagName.toUpperCase();
+      if (tag === 'IMG' || tag === 'SVG' || tag === 'BUTTON' || tag === 'A' || tag === 'INPUT') return true;
+      return hasOwnText(el);
+    };
+    const computeObstacles = () => {
+      const rects = [];
+      document.body.querySelectorAll('*').forEach((el) => {
+        if (el === lane || lane.contains(el)) return;
+        if (!isObstacleEl(el)) return;
+        const r = el.getBoundingClientRect();
+        if (r.width <= 0 || r.height <= 0) return;
+        rects.push({
+          top: r.top + window.scrollY - OBSTACLE_PAD,
+          bottom: r.bottom + window.scrollY + OBSTACLE_PAD,
+          left: r.left + window.scrollX - OBSTACLE_PAD,
+          right: r.right + window.scrollX + OBSTACLE_PAD,
+        });
+      });
+      return rects;
+    };
+
+    // Given a row (targetY to targetY+CAT_H) and the obstacle list, returns
+    // every clear horizontal stretch — [start, end] pairs in document X —
+    // wide enough for the cat to stand in.
+    const freeRangesAtY = (targetY) => {
+      const blocking = obstacles.filter((o) => o.top < targetY + CAT_H && o.bottom > targetY);
+      const intervals = blocking
+        .map((o) => [Math.max(0, o.left), Math.min(pageWidth, o.right)])
+        .filter(([a, b]) => b > a)
+        .sort((a, b) => a[0] - b[0]);
+      const merged = [];
+      intervals.forEach(([a, b]) => {
+        const last = merged[merged.length - 1];
+        if (last && a <= last[1]) last[1] = Math.max(last[1], b);
+        else merged.push([a, b]);
+      });
+      const free = [];
+      let cursor = 0;
+      merged.forEach(([a, b]) => {
+        if (a - cursor >= CAT_W) free.push([cursor, a]);
+        cursor = Math.max(cursor, b);
+      });
+      if (pageWidth - cursor >= CAT_W) free.push([cursor, pageWidth]);
+      return free;
+    };
+
+    const randomIn = ([a, b]) => a + Math.random() * Math.max(0, b - a - CAT_W);
+
+    // Look for a free spot anywhere on the page, trying a handful of
+    // random rows before giving up (a page could in theory be packed
+    // edge-to-edge at one particular row, just not everywhere at once).
+    // Used for autonomous hops, where landing somewhere else on the page
+    // is the whole point.
+    const findRandomFreeSpot = () => {
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const targetY = Math.random() * Math.max(1, pageHeight - CAT_H - 16) + 8;
+        const ranges = freeRangesAtY(targetY);
+        if (ranges.length) {
+          const range = ranges[Math.floor(Math.random() * ranges.length)];
+          return { x: randomIn(range), y: targetY };
         }
-        scheduleWander();
-      }, delay);
+      }
+      return { x: 8, y: Math.max(8, pageHeight - CAT_H - 20) };
+    };
+
+    // Look for the closest free spot to a given point, expanding outward
+    // row by row until one turns up. Used for clicks/teleports — if the
+    // exact spot is blocked, the cat should land right next to it, never
+    // clear across the page.
+    const SEARCH_STEP = 20;
+    const findNearestFreeSpot = (nearX, nearY) => {
+      for (let dy = 0; dy <= pageHeight; dy += SEARCH_STEP) {
+        const candidates = dy === 0 ? [nearY] : [nearY - dy, nearY + dy];
+        for (const rawY of candidates) {
+          if (rawY < 0 || rawY > pageHeight) continue;
+          const targetY = Math.max(8, Math.min(rawY, pageHeight - CAT_H - 8));
+          const ranges = freeRangesAtY(targetY);
+          if (!ranges.length) continue;
+          const distToRange = ([a, b]) => (nearX < a ? a - nearX : nearX > b - CAT_W ? nearX - (b - CAT_W) : 0);
+          const best = ranges.reduce((a, b) => (distToRange(b) < distToRange(a) ? b : a));
+          return { x: Math.min(Math.max(nearX, best[0]), Math.max(best[0], best[1] - CAT_W)), y: targetY };
+        }
+      }
+      return { x: 8, y: Math.max(8, pageHeight - CAT_H - 20) };
+    };
+
+    // The cat wanders freely anywhere on the page. Most steps just pick a
+    // new X on the current row and walk there horizontally (natural
+    // walk-cycle motion, never vertical). Every so often it instead hops
+    // — an arc, not a walk, since there's no "walking up/down" pose — to a
+    // different empty spot elsewhere on the page.
+    let justHopped = false;
+    const wanderStep = () => {
+      if (reduceMotion) return;
+      // Never hop twice in a row — always walk a bit after landing so it
+      // doesn't chain into a jarring flurry of jumps.
+      const shouldHop = !justHopped && Math.random() < 0.2;
+      justHopped = shouldHop;
+      if (shouldHop) {
+        const spot = findRandomFreeSpot();
+        jumpTo(spot.x, spot.y, wanderStep);
+        return;
+      }
+      const ranges = freeRangesAtY(y);
+      const current = ranges.find(([a, b]) => x >= a - 1 && x <= b - CAT_W + 1) || ranges[0];
+      if (!current) {
+        const spot = findNearestFreeSpot(x, y);
+        jumpTo(spot.x, spot.y, wanderStep);
+        return;
+      }
+      walkTo(randomIn(current), y, wanderStep);
+    };
+
+    // After a user-initiated move (click), give the cat a moment to just
+    // sit at the spot it was sent to before it resumes wandering off on
+    // its own — otherwise it can look like it's ignoring the click.
+    let wanderResumeTimer = null;
+    const resumeWanderingSoon = () => {
+      clearTimeout(wanderResumeTimer);
+      wanderResumeTimer = setTimeout(wanderStep, 80 + Math.random() * 120);
+    };
+
+    // A click teleports the cat there instantly (no travel time), nudged
+    // to the nearest clear spot so it never lands on top of real content,
+    // then it pauses briefly before picking wandering back up.
+    const teleportTo = (docX, docY) => {
+      const wantY = Math.max(8, Math.min(docY - CAT_H / 2, pageHeight - CAT_H - 8));
+      const wantX = docX - CAT_W / 2;
+      const spot = findNearestFreeSpot(wantX, wantY);
+      walkToken++; // cancel whatever walk is in flight
+      walking = false;
+      justHopped = false;
+      x = spot.x;
+      y = spot.y;
+      render();
+      resumeWanderingSoon();
     };
 
     // The lane itself is pointer-events:none (so hover/clicks on real
     // links and buttons underneath work completely normally — nothing
-    // sits on top of them). We just listen on <main> and only move the
-    // cat when the click didn't land on a real interactive element.
-    main.addEventListener('click', (e) => {
+    // sits on top of them). We listen on the whole page (header and
+    // footer included) and only move the cat when the click didn't land
+    // on a real interactive element.
+    document.body.addEventListener('click', (e) => {
       if (e.target.closest('a, button, input, textarea, select, [role="button"]')) return;
       const rect = lane.getBoundingClientRect();
       hideHint();
-      goToPoint(e.clientX - rect.left, e.clientY - rect.top);
-      scheduleWander();
+      teleportTo(e.clientX - rect.left, e.clientY - rect.top);
     });
 
     cat.addEventListener('click', (e) => {
       e.stopPropagation();
       hideHint();
-      jumpTo(x, y); // a little hop in place
-      scheduleWander();
+      walkToken++; // pause wandering for the bounce
+      jumpTo(x, y, resumeWanderingSoon); // a little hop in place, then resume wandering
     });
 
     swatchButtons.forEach((btn) => {
@@ -294,13 +479,29 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    let initialized = false;
     const measure = () => {
-      laneWidth = lane.clientWidth;
-      laneHeight = lane.clientHeight;
-      const clampedX = Math.min(Math.max(x, 8), Math.max(8, laneWidth - CAT_W - 8));
-      const clampedY = Math.min(Math.max(y, 8), Math.max(8, laneHeight - CAT_H - 8));
-      x = clampedX;
-      y = clampedY;
+      pageWidth = document.documentElement.clientWidth;
+      pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      obstacles = computeObstacles();
+      // Stay near wherever the cat already is if that's still clear;
+      // otherwise (e.g. images just loaded and shifted the layout so this
+      // spot is now covered) cancel any walk in flight and hop to the
+      // nearest free spot instead.
+      const ranges = freeRangesAtY(y);
+      const stillClear = ranges.some(([a, b]) => x >= a - 1 && x <= b - CAT_W + 1);
+      if (!stillClear) {
+        const spot = findNearestFreeSpot(x, y);
+        x = spot.x;
+        y = spot.y;
+        walkToken++;
+        walking = false;
+        render();
+        // The cancelled walk's onDone will never fire, so restart the chain
+        // (skip on the very first call — initial setup does this itself).
+        if (initialized) wanderStep();
+        return;
+      }
       render();
     };
 
@@ -310,19 +511,25 @@ document.addEventListener('DOMContentLoaded', () => {
       resizeTimer = setTimeout(measure, 150);
     });
     measure();
-    // Start near the bottom-right of the content — right above the
-    // footer, since that's exactly where <main> ends.
-    x = Math.max(8, laneWidth - CAT_W - 20);
-    y = Math.max(8, laneHeight - CAT_H - 20);
+    // Start near a free spot toward the bottom-right of the page.
+    {
+      const spot = findNearestFreeSpot(pageWidth - CAT_W - 20, Math.max(8, pageHeight - CAT_H - 40));
+      x = spot.x;
+      y = spot.y;
+    }
+    initialized = true;
     render();
-    scheduleWander();
+    wanderStep();
 
-    // Web fonts loading late can reflow the page (changing content
-    // height) after the initial measurement — recheck once they land.
+    // Fonts and images loading late can reflow the page (changing content
+    // height/position) after the initial measurement — recheck once
+    // everything has actually settled.
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(measure);
     }
+    window.addEventListener('load', measure);
     setTimeout(measure, 600);
+    setTimeout(measure, 1500);
 
     if (!localStorage.getItem('catHintSeen')) {
       localStorage.setItem('catHintSeen', '1');

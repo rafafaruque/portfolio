@@ -894,19 +894,16 @@ button.photo-frame {
 }
 
 /* ============================================================
-   Cat companion — a small easter egg. Click anywhere in the main
-   content area and it hops over to that spot. Real links/buttons
-   underneath still work (script.js forwards the click to them).
+   Cat companion — a small easter egg. It wanders the whole page
+   (header and footer included) and hops wherever you click. Real
+   links/buttons underneath still work (script.js forwards clicks).
    ============================================================ */
-
-main {
-  position: relative;
-}
 
 .cat-lane {
   position: absolute;
-  inset: 0;
-  z-index: 40;
+  top: 0;
+  left: 0;
+  z-index: 55; /* above the sticky header (50) so the cat never hides behind it */
   pointer-events: none;
 }
 
