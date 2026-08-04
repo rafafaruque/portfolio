@@ -132,11 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.values(CAT_VARIANTS).forEach((v) => v.frames.forEach((src) => { new Image().src = src; }));
 
     const main = document.querySelector('main');
+    const footerInner = document.querySelector('.site-footer .footer-inner');
     if (!main) return;
 
-    const CAT_W = 66;
-    const CAT_H = 44;
-    const PACE_RADIUS = 70;
+    const CAT_W = 42;
+    const CAT_H = 28;
+    const WANDER_MIN_DELAY = 2500;
+    const WANDER_MAX_DELAY = 6500;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const lane = document.createElement('div');
@@ -159,7 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.innerHTML = Object.keys(CAT_VARIANTS)
       .map((key) => `<button type="button" class="cat-swatch" data-cat="${key}" style="--swatch:${CAT_VARIANTS[key].swatch}" aria-label="${key} cat"></button>`)
       .join('');
-    document.body.appendChild(controls);
+    // Placed in the footer (normal document flow) rather than fixed to the
+    // viewport, so it stays put on the page instead of following scroll.
+    (footerInner || document.body).appendChild(controls);
 
     const catImg = cat.querySelector('img');
     const hint = cat.querySelector('.cat-hint');
@@ -170,18 +174,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let x = 20;
     let y = 20;
     let dir = 1;
-    const speed = 34; // px/sec
-    let bounds = { min: 8, max: 8 };
     let jumping = false;
-    let lastTime = null;
+    let wanderTimerId = null;
 
     // Walk-cycle animation — each color has 4 leg-frame images (cat-{color}-walk1..4.png).
-    // We step through them while the cat is actually moving (pacing or jumping to a
-    // click), and hold on the current frame when still.
+    // We step through them while the cat is actually jumping to a new spot,
+    // and hold on the current frame when still.
     let currentCatKey = 'green';
     let walkFrame = 0;
-    let walkTimer = 0;
-    const FRAME_INTERVAL = 0.11; // seconds per leg frame while pacing
 
     const setWalkFrame = (idx) => {
       walkFrame = idx;
@@ -195,13 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     applyVariant(localStorage.getItem('catVariant') || 'green');
 
-    const paceBounds = (centerX) => ({
-      min: Math.max(8, centerX - PACE_RADIUS),
-      max: Math.min(Math.max(8, laneWidth - CAT_W - 8), centerX + PACE_RADIUS),
-    });
-
+    // The sprite art faces left by default, so moving right (dir === 1)
+    // needs a horizontal flip to actually face — and walk — forward.
     const render = () => {
-      cat.style.transform = `translate(${x}px, ${y}px) scaleX(${dir})`;
+      cat.style.transform = `translate(${x}px, ${y}px) scaleX(${-dir})`;
     };
 
     const hideHint = () => hint.classList.remove('is-visible');
@@ -249,9 +246,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const clampedX = Math.min(Math.max(targetX - CAT_W / 2, 8), Math.max(8, laneWidth - CAT_W - 8));
       const clampedY = Math.min(Math.max(targetY - CAT_H / 2, 8), Math.max(8, laneHeight - CAT_H - 8));
       dir = clampedX < x ? -1 : 1;
-      jumpTo(clampedX, clampedY, () => {
-        bounds = paceBounds(clampedX);
-      });
+      jumpTo(clampedX, clampedY);
+    };
+
+    // Sporadic wandering — instead of pacing back and forth in one small
+    // spot, the cat hops to a random point anywhere in the content area
+    // every few seconds when nothing else is telling it where to go.
+    const scheduleWander = () => {
+      if (reduceMotion) return;
+      clearTimeout(wanderTimerId);
+      const delay = WANDER_MIN_DELAY + Math.random() * (WANDER_MAX_DELAY - WANDER_MIN_DELAY);
+      wanderTimerId = setTimeout(() => {
+        if (!jumping) {
+          const targetX = 8 + Math.random() * Math.max(8, laneWidth - CAT_W - 16);
+          const targetY = 8 + Math.random() * Math.max(8, laneHeight - CAT_H - 16);
+          dir = targetX < x ? -1 : 1;
+          jumpTo(targetX, targetY);
+        }
+        scheduleWander();
+      }, delay);
     };
 
     // The lane itself is pointer-events:none (so hover/clicks on real
@@ -263,12 +276,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const rect = lane.getBoundingClientRect();
       hideHint();
       goToPoint(e.clientX - rect.left, e.clientY - rect.top);
+      scheduleWander();
     });
 
     cat.addEventListener('click', (e) => {
       e.stopPropagation();
       hideHint();
       jumpTo(x, y); // a little hop in place
+      scheduleWander();
     });
 
     swatchButtons.forEach((btn) => {
@@ -286,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const clampedY = Math.min(Math.max(y, 8), Math.max(8, laneHeight - CAT_H - 8));
       x = clampedX;
       y = clampedY;
-      bounds = paceBounds(x);
       render();
     };
 
@@ -300,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // footer, since that's exactly where <main> ends.
     x = Math.max(8, laneWidth - CAT_W - 20);
     y = Math.max(8, laneHeight - CAT_H - 20);
-    bounds = paceBounds(x);
     render();
+    scheduleWander();
 
     // Web fonts loading late can reflow the page (changing content
     // height) after the initial measurement — recheck once they land.
@@ -317,27 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(hideHint, 4000);
       }, 1200);
     }
-
-    const step = (now) => {
-      if (!jumping && !reduceMotion) {
-        if (lastTime === null) lastTime = now;
-        const dt = Math.min((now - lastTime) / 1000, 0.05);
-        lastTime = now;
-        x += dir * speed * dt;
-        if (x <= bounds.min) { x = bounds.min; dir = 1; }
-        if (x >= bounds.max) { x = bounds.max; dir = -1; }
-        walkTimer += dt;
-        if (walkTimer >= FRAME_INTERVAL) {
-          walkTimer -= FRAME_INTERVAL;
-          setWalkFrame((walkFrame + 1) % 4);
-        }
-        render();
-      } else {
-        lastTime = null;
-      }
-      requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
   })();
 
   // Gentle fade-in as sections enter the viewport
