@@ -427,6 +427,36 @@ button:focus-visible {
   color: var(--ink-muted);
 }
 
+/* Writing's quiet moving-day empty state. */
+.writing-main {
+  display: grid;
+  align-items: center;
+  padding: var(--space-lg) 0;
+}
+
+.writing-empty {
+  width: 100%;
+  text-align: center;
+}
+
+.writing-empty .page-title {
+  margin-bottom: var(--space-2xs);
+}
+
+.writing-status {
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+
+.writing-scene {
+  display: block;
+  margin: var(--space-md) auto 0;
+  max-width: 100%;
+  image-rendering: pixelated;
+}
+
+
 /* ============================================================
    Experience (projects page)
    ============================================================ */
@@ -532,6 +562,7 @@ button:focus-visible {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
+  transition: transform 180ms ease-out;
 }
 
 .project-image-placeholder {
@@ -557,6 +588,24 @@ button:focus-visible {
   flex-wrap: wrap;
   gap: var(--space-3xs);
   margin-bottom: var(--space-sm);
+}
+
+.project-tags .tag {
+  background-color: var(--paper-raised);
+  transition: color 140ms ease-out, background-color 140ms ease-out;
+}
+
+@media (hover: hover) {
+  .project-tags .tag:hover {
+    color: var(--paper-raised);
+    background-color: var(--ink-muted);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .project-card:hover .project-image {
+    transform: translateY(-3px);
+  }
 }
 
 .project-desc {
