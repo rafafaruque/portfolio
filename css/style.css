@@ -894,10 +894,7 @@ button.photo-frame {
 }
 
 /* ============================================================
-   Cat companion — a small easter egg. It wanders the whole page
-   (header and footer included) and teleports wherever you click.
-   Real links/buttons underneath still work (script.js leaves
-   those clicks alone instead of moving the cat).
+   Cat companion — optional walks and naps in the page margins.
    ============================================================ */
 
 .cat-lane {
@@ -928,10 +925,52 @@ button.photo-frame {
   display: block;
   transition: transform 0.12s ease;
   -webkit-user-drag: none;
+  transform: scaleX(var(--cat-facing, 1));
+  transform-origin: center bottom;
+  image-rendering: pixelated;
 }
 
 .cat-sprite:hover img {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scaleX(var(--cat-facing, 1));
+}
+
+.cat-sprite.is-sleeping img {
+  transform: scaleX(var(--cat-facing, 1)) scaleY(0.72);
+  animation: cat-breathe 3s ease-in-out infinite;
+}
+
+.cat-sleep {
+  display: none;
+  position: absolute;
+  bottom: 85%;
+  left: 45%;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--safelight-dim);
+  pointer-events: none;
+}
+
+.is-sleeping .cat-sleep { display: block; }
+
+@keyframes cat-breathe {
+  50% { transform: scaleX(var(--cat-facing, 1)) scaleY(0.77); }
+}
+
+.cat-hide {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.cat-hide:hover { color: var(--ink); }
+
+.cat-lane[hidden] {
+  display: none;
 }
 
 .cat-hint {
@@ -960,7 +999,7 @@ button.photo-frame {
   align-items: center;
   gap: var(--space-2xs);
   margin-left: var(--space-sm);
-  opacity: 0.4;
+  opacity: 0.8;
   transition: opacity var(--transition);
 }
 
@@ -968,7 +1007,8 @@ button.photo-frame {
   display: none;
 }
 
-.cat-controls:hover {
+.cat-controls:hover,
+.cat-controls:focus-within {
   opacity: 1;
 }
 

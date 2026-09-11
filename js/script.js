@@ -103,10 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Cat companion — wanders the whole page and teleports wherever you
-  // click. Real links/buttons underneath still work: the lane itself is
-  // pointer-events:none, and clicks on an actual link/button are left
-  // alone rather than moving the cat.
+  // Optional cat companion: short walks, quiet perches, and naps.
   (() => {
     const CAT_VARIANTS = {
       orange: {
@@ -127,322 +124,229 @@ document.addEventListener('DOMContentLoaded', () => {
       },
     };
 
-    // Preload every frame of every color so switching variants or
-    // advancing the walk cycle never shows a blank/flickering frame.
-    Object.values(CAT_VARIANTS).forEach((v) => v.frames.forEach((src) => { new Image().src = src; }));
+    const footer = document.querySelector('.site-footer');
+    const host = footer?.querySelector('.footer-inner');
+    if (!host) return;
 
-    const main = document.querySelector('main');
-    const footerInner = document.querySelector('.site-footer .footer-inner');
-    if (!main) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const width = 42;
+    const height = 28;
+    let active = false;
+    let variant = localStorage.getItem('catVariant') || 'green';
+    if (!CAT_VARIANTS[variant]) variant = 'green';
+    let x = 0;
+    let y = 0;
+    let direction = -1;
+    let timer;
+    let animation;
+    let hintTimer;
+    let currentPerch;
 
-    const CAT_W = 42;
-    const CAT_H = 28;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // The cat only appears once someone opts in by clicking the icon next
-    // to the footer's color swatches — after that it's remembered, so it
-    // auto-appears (and starts wandering) on every future visit.
-    const activateBtn = document.createElement('button');
-    activateBtn.type = 'button';
-    activateBtn.className = 'cat-activate';
-    activateBtn.setAttribute('aria-label', 'Add a cat companion');
-    activateBtn.title = 'Click to add a cat companion!';
-    activateBtn.innerHTML = '<img src="images/cat-green-walk1.png" alt="" draggable="false">';
+    const activate = document.createElement('button');
+    activate.type = 'button';
+    activate.className = 'cat-activate';
+    activate.setAttribute('aria-label', 'Add a cat companion');
+    activate.title = 'Add a cat companion';
+    activate.innerHTML = '<img src="images/cat-green-walk1.png" alt="" draggable="false">';
 
     const controls = document.createElement('div');
     controls.className = 'cat-controls';
-    controls.innerHTML = Object.keys(CAT_VARIANTS)
-      .map((key) => `<button type="button" class="cat-swatch" data-cat="${key}" style="--swatch:${CAT_VARIANTS[key].swatch}" aria-label="${key} cat"></button>`)
-      .join('');
-    const swatchButtons = Array.from(controls.querySelectorAll('.cat-swatch'));
+    controls.hidden = true;
+    controls.innerHTML = Object.keys(CAT_VARIANTS).map(key =>
+      `<button type="button" class="cat-swatch" data-cat="${key}" style="--swatch:${CAT_VARIANTS[key].swatch}" aria-label="${key} cat"></button>`
+    ).join('') + '<button type="button" class="cat-hide">Hide cat</button>';
+    host.append(activate, controls);
 
-    // Placed in the footer (normal document flow) rather than fixed to the
-    // viewport, so they stay put on the page instead of following scroll.
-    const footerHost = footerInner || document.body;
-    footerHost.appendChild(activateBtn);
-    footerHost.appendChild(controls);
-
-    const activated = localStorage.getItem('catActivated') === '1';
-    activateBtn.hidden = activated;
-    controls.hidden = !activated;
-
-    const startCat = () => {
     const lane = document.createElement('div');
     lane.className = 'cat-lane';
-
+    lane.hidden = true;
     const cat = document.createElement('button');
     cat.type = 'button';
     cat.className = 'cat-sprite';
-    cat.setAttribute('aria-label', 'Cat companion');
-    cat.innerHTML = `
-      <img src="images/cat-green-walk1.png" alt="" draggable="false">
-      <span class="cat-hint">click anywhere to move me!</span>
-    `;
-
-    lane.appendChild(cat);
-    // Attached to <body>, not <main>, so the cat can roam the whole page —
-    // header and footer included — not just the main content area.
-    document.body.appendChild(lane);
-
-    const catImg = cat.querySelector('img');
+    cat.setAttribute('aria-label', 'Cat companion — click to play');
+    cat.innerHTML = '<img alt="" draggable="false"><span class="cat-sleep" aria-hidden="true">z z z</span><span class="cat-hint">click anywhere to move me!</span>';
+    lane.append(cat);
+    document.body.append(lane);
+    const sprite = cat.querySelector('img');
     const hint = cat.querySelector('.cat-hint');
 
-    let pageWidth = 0;
-    let pageHeight = 0;
-    let x = 20;
-    let y = 20;
-    let dir = 1;
-    let jumping = false; // true only during the little in-place bounce (self-click)
-    let walking = false; // true while actually traveling to a new spot
-    let walkToken = 0; // bumped whenever a walk is cancelled (teleport/new walk), so stale rAF loops know to stop
-    const WALK_SPEED = 70; // px/sec
-    const FRAME_INTERVAL = 0.14; // seconds per leg frame while walking
-
-    // Walk-cycle animation — each color has 4 leg-frame images (cat-{color}-walk1..4.png).
-    // We step through them while the cat is actually jumping to a new spot,
-    // and hold on the current frame when still.
-    let currentCatKey = 'green';
-    let walkFrame = 0;
-
-    const setWalkFrame = (idx) => {
-      walkFrame = idx;
-      catImg.src = CAT_VARIANTS[currentCatKey].frames[walkFrame];
-    };
-
-    const applyVariant = (key) => {
-      currentCatKey = CAT_VARIANTS[key] ? key : 'green';
-      setWalkFrame(walkFrame);
-      swatchButtons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.cat === currentCatKey));
-    };
-    applyVariant(localStorage.getItem('catVariant') || 'green');
-
-    // The sprite art faces left by default, so moving right (dir === 1)
-    // needs a horizontal flip to actually face — and walk — forward.
+    const frame = (index = 0) => { sprite.src = CAT_VARIANTS[variant].frames[index]; };
     const render = () => {
-      cat.style.transform = `translate(${x}px, ${y}px) scaleX(${-dir})`;
+      cat.style.transform = `translate(${x}px, ${y}px)`;
+      sprite.style.setProperty('--cat-facing', direction === 1 ? -1 : 1);
+    };
+    const updateVariant = () => {
+      frame();
+      controls.querySelectorAll('[data-cat]').forEach(button => {
+        const selected = button.dataset.cat === variant;
+        button.classList.toggle('is-active', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    };
+    updateVariant();
+
+    const stop = () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(animation);
+      cat.classList.remove('is-sleeping');
     };
 
-    const hideHint = () => hint.classList.remove('is-visible');
-
-    const jumpTo = (targetX, targetY, onDone) => {
-      if (reduceMotion) {
-        x = targetX;
-        y = targetY;
-        render();
-        if (onDone) onDone();
-        return;
-      }
-      jumping = true;
-      const startX = x;
-      const startY = y;
-      const dx = targetX - startX;
-      const dy = targetY - startY;
-      const dist = Math.hypot(dx, dy);
-      if (dist > 1) dir = dx < 0 ? -1 : 1;
-      const duration = Math.min(900, Math.max(320, dist * 0.5));
-      const start = performance.now();
-      const arc = Math.max(24, dist * 0.25);
-
-      const animateJump = (now) => {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        x = startX + dx * ease;
-        y = startY + dy * ease - Math.sin(t * Math.PI) * arc;
-        const frame = Math.min(3, Math.floor(t * 4));
-        if (frame !== walkFrame) setWalkFrame(frame);
-        render();
-        if (t < 1) {
-          requestAnimationFrame(animateJump);
+    // Perches live in the whitespace above the footer, below the intro,
+    // and beside cards/photos when the page has enough outer margin.
+    const perches = () => {
+      const origin = lane.getBoundingClientRect();
+      const maxX = Math.max(8, document.documentElement.clientWidth - width - 8);
+      const result = [];
+      const add = (element, side = false) => {
+        const rect = element.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        if (side) {
+          if (rect.right + width + 20 > document.documentElement.clientWidth) return;
+          result.push({element, side, min: rect.right - origin.left + 8,
+            max: Math.min(maxX, rect.right - origin.left + 28),
+            y: rect.bottom - origin.top - height});
         } else {
-          x = targetX;
-          y = targetY;
-          jumping = false;
-          render();
-          if (onDone) onDone();
+          result.push({element, side, min: Math.max(8, rect.left - origin.left + 16),
+            max: Math.min(maxX, rect.right - origin.left - width - 16),
+            y: Math.max(0, rect.top - origin.top - height - 6)});
         }
       };
-      requestAnimationFrame(animateJump);
+      add(footer);
+      document.querySelectorAll('.project-card, .about-photo, .contact-sheet').forEach(el => add(el, true));
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        const rect = hero.getBoundingClientRect();
+        result.push({element: hero, min: Math.max(8, rect.left - origin.left + 32),
+          max: Math.min(maxX, rect.right - origin.left - width - 32),
+          y: rect.bottom - origin.top + 8});
+      }
+      return result.filter(p => p.max >= p.min);
     };
 
-    // Actually walk (ground-level, legs cycling the whole way) from wherever
-    // the cat is to a target point, instead of arcing through the air. Every
-    // walk carries a token so a later teleport/new walk can tell this one's
-    // rAF loop to stop touching x/y instead of fighting over the position.
-    const walkTo = (targetX, targetY, onDone) => {
-      const myToken = ++walkToken;
-      if (reduceMotion) {
-        x = targetX;
-        y = targetY;
-        render();
-        if (onDone) onDone();
-        return;
+    const rest = (afterClick = false, allowSleep = true) => {
+      if (!active) return;
+      frame();
+      const sleeping = allowSleep && !afterClick && Math.random() < 0.2;
+      cat.classList.toggle('is-sleeping', sleeping);
+      if (!motion.matches) {
+        timer = setTimeout(wander, afterClick ? 1000 : sleeping ? 8000 + Math.random() * 4000 : 2000 + Math.random() * 2000);
       }
+    };
+
+    const travel = (targetX, targetY, hop, done) => {
+      stop();
       const startX = x;
       const startY = y;
-      const dx = targetX - startX;
-      const dy = targetY - startY;
-      const dist = Math.hypot(dx, dy);
-      if (dist < 1) {
-        if (onDone) onDone();
-        return;
+      const distance = Math.hypot(targetX - x, targetY - y);
+      if (targetX !== x) direction = targetX > x ? 1 : -1;
+      if (motion.matches) {
+        x = targetX; y = targetY; render(); done(); return;
       }
-      walking = true;
-      dir = dx < 0 ? -1 : 1;
-      const duration = Math.max(260, (dist / WALK_SPEED) * 1000);
-      const start = performance.now();
-      let lastNow = start;
-      let frameTimer = 0;
-
-      const animateWalk = (now) => {
-        if (myToken !== walkToken) return; // cancelled — a teleport or newer walk took over
-        const t = Math.min((now - start) / duration, 1);
-        x = startX + dx * t;
-        y = startY + dy * t;
-        frameTimer += (now - lastNow) / 1000;
-        lastNow = now;
-        if (frameTimer >= FRAME_INTERVAL) {
-          frameTimer -= FRAME_INTERVAL;
-          setWalkFrame((walkFrame + 1) % 4);
-        }
+      const duration = hop ? Math.min(850, Math.max(380, distance * 0.8)) : Math.max(300, distance / 55 * 1000);
+      const started = performance.now();
+      const tick = now => {
+        if (!active) return;
+        const elapsed = Math.max(0, now - started);
+        const t = Math.min(1, elapsed / duration);
+        x = startX + (targetX - startX) * t;
+        y = startY + (targetY - startY) * t - (hop ? Math.sin(t * Math.PI) * Math.min(60, 20 + distance * 0.12) : 0);
+        frame(Math.floor(elapsed / 140) % 4);
         render();
-        if (t < 1) {
-          requestAnimationFrame(animateWalk);
-        } else {
-          x = targetX;
-          y = targetY;
-          walking = false;
-          render();
-          if (onDone) onDone();
-        }
+        if (t < 1) animation = requestAnimationFrame(tick);
+        else { frame(); done(); }
       };
-      requestAnimationFrame(animateWalk);
+      animation = requestAnimationFrame(tick);
     };
 
-    // The cat can stand anywhere in these bounds — no obstacle avoidance,
-    // it can walk right up next to (or under) any text or image.
-    const randomPoint = () => ({
-      x: 8 + Math.random() * Math.max(8, pageWidth - CAT_W - 16),
-      y: 8 + Math.random() * Math.max(8, pageHeight - CAT_H - 16),
-    });
+    function wander() {
+      if (!active || motion.matches) return;
+      const spots = perches();
+      if (!spots.length) return;
+      const same = currentPerch?.manual ? currentPerch : spots.find(p => p.element === currentPerch?.element && p.side === currentPerch?.side);
+      // A click clears the perch. Take the first walk on that same row,
+      // treating the chosen location as a temporary place to hang out.
+      const spot = !currentPerch
+        ? {manual: true, min: Math.max(8, x - 160), max: Math.min(document.documentElement.clientWidth - width - 8, x + 160), y}
+        : same && Math.random() < 0.75 ? same : spots[Math.floor(Math.random() * spots.length)];
+      currentPerch = spot;
+      const step = 60 + Math.random() * 100;
+      let heading = Math.random() < 0.5 ? -1 : 1;
+      // Turn around at a perch edge instead of repeatedly choosing the
+      // same clamped position and going straight back to rest.
+      if (x <= spot.min + 1) heading = 1;
+      else if (x >= spot.max - 1) heading = -1;
+      const target = Math.max(spot.min, Math.min(spot.max, x + heading * step));
+      travel(target, spot.y, Math.abs(y - spot.y) > 2, () => rest());
+    }
 
-    // The cat wanders freely anywhere on the page. Most steps just pick a
-    // new X on the current row and walk there horizontally (natural
-    // walk-cycle motion, never vertical). Every so often it instead hops
-    // — an arc, not a walk, since there's no "walking up/down" pose — to a
-    // different spot elsewhere on the page.
-    let justHopped = false;
-    const wanderStep = () => {
-      if (reduceMotion) return;
-      // Never hop twice in a row — always land somewhere before deciding
-      // to hop again, so it doesn't chain into a jarring flurry of jumps.
-      const shouldHop = !justHopped && Math.random() < 0.25;
-      justHopped = shouldHop;
-      if (shouldHop) {
-        const spot = randomPoint();
-        jumpTo(spot.x, spot.y, wanderStep);
-        return;
-      }
-      const targetX = 8 + Math.random() * Math.max(8, pageWidth - CAT_W - 16);
-      walkTo(targetX, y, wanderStep);
-    };
-
-    // After a user-initiated move (click), give the cat a moment to just
-    // sit at the spot it was sent to before it resumes wandering off on
-    // its own — otherwise it can look like it's ignoring the click.
-    let wanderResumeTimer = null;
-    const resumeWanderingSoon = () => {
-      clearTimeout(wanderResumeTimer);
-      wanderResumeTimer = setTimeout(wanderStep, 80 + Math.random() * 120);
-    };
-
-    // A click teleports the cat there instantly (no travel time), then it
-    // pauses briefly before picking wandering back up.
-    const teleportTo = (docX, docY) => {
-      walkToken++; // cancel whatever walk is in flight
-      walking = false;
-      justHopped = false;
-      x = Math.min(Math.max(docX - CAT_W / 2, 8), Math.max(8, pageWidth - CAT_W - 8));
-      y = Math.min(Math.max(docY - CAT_H / 2, 8), Math.max(8, pageHeight - CAT_H - 8));
+    const settle = () => {
+      if (!active) return;
+      stop();
+      const spots = perches();
+      const spot = spots.find(p => p.element === currentPerch?.element && p.side === currentPerch?.side) || spots[0];
+      if (!spot) return;
+      currentPerch = spot;
+      x = Math.max(spot.min, Math.min(spot.max, x));
+      y = spot.y;
       render();
-      resumeWanderingSoon();
+      rest(false, false);
     };
 
-    // The lane itself is pointer-events:none (so hover/clicks on real
-    // links and buttons underneath work completely normally — nothing
-    // sits on top of them). We listen on the whole page (header and
-    // footer included) and only move the cat when the click didn't land
-    // on a real interactive element.
-    document.body.addEventListener('click', (e) => {
-      if (e.target.closest('a, button, input, textarea, select, [role="button"]')) return;
+    const setActive = enabled => {
+      stop();
+      clearTimeout(hintTimer);
+      hint.classList.remove('is-visible');
+      active = enabled;
+      localStorage.setItem('catActivated', enabled ? '1' : '0');
+      lane.hidden = !enabled;
+      controls.hidden = !enabled;
+      activate.hidden = enabled;
+      if (enabled) {
+        CAT_VARIANTS[variant].frames.forEach(src => { new Image().src = src; });
+        settle();
+        if (!localStorage.getItem('catHintSeen')) {
+          localStorage.setItem('catHintSeen', '1');
+          hint.classList.add('is-visible');
+          hintTimer = setTimeout(() => hint.classList.remove('is-visible'), 4000);
+        }
+      }
+    };
+    activate.addEventListener('click', () => {
+      setActive(true);
+      controls.querySelector('[data-cat]').focus({preventScroll: true});
+    });
+    controls.querySelector('.cat-hide').addEventListener('click', () => {
+      setActive(false);
+      activate.focus({preventScroll: true});
+    });
+    controls.querySelectorAll('[data-cat]').forEach(button => button.addEventListener('click', () => {
+      variant = button.dataset.cat;
+      localStorage.setItem('catVariant', variant);
+      updateVariant();
+    }));
+    document.body.addEventListener('click', event => {
+      if (!active || event.target.closest('a, button, input, textarea, select, [role="button"], [contenteditable="true"]')) return;
+      stop();
+      hint.classList.remove('is-visible');
       const rect = lane.getBoundingClientRect();
-      hideHint();
-      teleportTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
-
-    cat.addEventListener('click', (e) => {
-      e.stopPropagation();
-      hideHint();
-      walkToken++; // pause wandering for the bounce
-      jumpTo(x, y, resumeWanderingSoon); // a little hop in place, then resume wandering
-    });
-
-    swatchButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const key = btn.dataset.cat;
-        localStorage.setItem('catVariant', key);
-        applyVariant(key);
-      });
-    });
-
-    const measure = () => {
-      pageWidth = document.documentElement.clientWidth;
-      pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-      x = Math.min(Math.max(x, 8), Math.max(8, pageWidth - CAT_W - 8));
-      y = Math.min(Math.max(y, 8), Math.max(8, pageHeight - CAT_H - 8));
+      x = Math.max(8, Math.min(document.documentElement.clientWidth - width - 8, event.clientX - rect.left - width / 2));
+      y = Math.max(0, Math.min(document.documentElement.scrollHeight - height, event.clientY - rect.top - height));
+      currentPerch = null;
       render();
-    };
-
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(measure, 150);
+      rest(true);
     });
-    measure();
-    // Start near the bottom-right of the page.
-    x = Math.max(8, pageWidth - CAT_W - 20);
-    y = Math.max(8, pageHeight - CAT_H - 40);
-    render();
-    wanderStep();
+    cat.addEventListener('click', () => {
+      hint.classList.remove('is-visible');
+      travel(x, y, true, () => rest(true));
+    });
+    motion.addEventListener('change', settle);
+    window.addEventListener('resize', settle);
+    window.addEventListener('load', settle);
+    if (document.fonts?.ready) document.fonts.ready.then(settle);
+    // Expanded photo rolls and late-loading images can move the footer.
+    if ('ResizeObserver' in window) new ResizeObserver(settle).observe(document.querySelector('main'));
+    if (localStorage.getItem('catActivated') === '1') setActive(true);
 
-    // Fonts and images loading late can reflow the page (changing content
-    // height/position) after the initial measurement — recheck once
-    // everything has actually settled.
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(measure);
-    }
-    window.addEventListener('load', measure);
-    setTimeout(measure, 600);
-    setTimeout(measure, 1500);
-
-    if (!localStorage.getItem('catHintSeen')) {
-      localStorage.setItem('catHintSeen', '1');
-      setTimeout(() => {
-        hint.classList.add('is-visible');
-        setTimeout(hideHint, 4000);
-      }, 1200);
-    }
-    }; // end startCat
-
-    if (activated) {
-      startCat();
-    } else {
-      activateBtn.addEventListener('click', () => {
-        localStorage.setItem('catActivated', '1');
-        activateBtn.hidden = true;
-        controls.hidden = false;
-        startCat();
-      });
-    }
   })();
 
   // Gentle fade-in as sections enter the viewport
