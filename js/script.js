@@ -20,6 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Homepage photograph: native dialog supplies modal focus and Escape handling.
+  const homePhotoOpen = document.querySelector('.hero-photo-open');
+  const homePhotoDialog = document.getElementById('home-photo-dialog');
+  if (homePhotoOpen && homePhotoDialog) {
+    let previousOverflow;
+    let previousFocus;
+    homePhotoOpen.addEventListener('click', () => {
+      previousFocus = document.activeElement;
+      previousOverflow = document.documentElement.style.overflow;
+      homePhotoDialog.showModal();
+      document.documentElement.style.overflow = 'hidden';
+    });
+    homePhotoDialog.querySelector('.home-photo-close').addEventListener('click', () => {
+      homePhotoDialog.close();
+    });
+    homePhotoDialog.addEventListener('click', (event) => {
+      if (event.target === homePhotoDialog) homePhotoDialog.close();
+    });
+    homePhotoDialog.addEventListener('close', () => {
+      document.documentElement.style.overflow = previousOverflow;
+      previousFocus?.focus({ preventScroll: true });
+    });
+  }
+
   // Photo roll — clicking a cover expands its .roll-gallery inline, right
   // in the contact sheet (an accordion, not a popup). Everything flows in
   // one continuous grid, so expanding a roll never leaves gaps — whatever

@@ -21,9 +21,9 @@
   <link rel="icon" href="images/favicon.png?v=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=45">
+  <link rel="stylesheet" href="css/style.css?v=53">
 </head>
-<body>
+<body class="home-page">
 
   <header class="site-header">
     <div class="container header-inner">
@@ -45,14 +45,19 @@
 
   <main>
     <section class="hero container">
-      <h1 class="hero-name">Rafa Faruque</h1>
-      <p class="hero-bio">
-        Hi - I'm a software engineer driven by building things that make people's lives a little brighter.
-        Currently working on trading infrastructure <a href="https://www.db.com/" target="_blank" rel="noopener"><code>@Deutsche Bank</code></a>. Previously
-        <a href="https://www.meta.com/about/?srsltid=AfmBOorMatWXT0v8ZsrDi4hFMDVuALKvmgd6SKPhjMLXb07G2FxeDcs0" target="_blank" rel="noopener"><code>@Meta</code></a>,
-        <a href="https://atlandventures.com/" target="_blank" rel="noopener"><code>@Atland Ventures</code></a>,
-        <a href="https://www.optum.com/en/" target="_blank" rel="noopener"><code>@Optum</code></a>. Now chasing what's next.
-      </p>
+      <div class="hero-content">
+      <h1 class="hero-name">Hi, I'm Rafa!</h1>
+      <p class="hero-bio">I'm a software engineer driven by building things that make people's lives a little brighter.</p>
+      <p class="hero-work-label">I've worked with</p>
+      <div class="hero-companies">
+        <a href="https://www.db.com/" target="_blank" rel="noopener"><code>@Deutsche Bank</code></a>
+        <span aria-hidden="true">·</span>
+        <a href="https://www.meta.com/about/?srsltid=AfmBOorMatWXT0v8ZsrDi4hFMDVuALKvmgd6SKPhjMLXb07G2FxeDcs0" target="_blank" rel="noopener"><code>@Meta</code></a>
+        <span aria-hidden="true">·</span>
+        <a href="https://atlandventures.com/" target="_blank" rel="noopener"><code>@Atland Ventures</code></a>
+        <span aria-hidden="true">·</span>
+        <a href="https://www.optum.com/en/" target="_blank" rel="noopener"><code>@Optum</code></a>
+      </div>
       <div class="hero-actions icon-links">
           <!-- <a href="projects.html" class="icon-link" title="Projects" aria-label="Projects">
             <svg viewBox="0 0 16 16"><g transform="rotate(-45 8 8)"><rect x="6.8" y="6.5" width="2.4" height="8.5" rx="1"/><rect x="3" y="1.5" width="8" height="4.2" rx="1"/></g></svg>
@@ -70,6 +75,19 @@
             <svg viewBox="0 0 16 16"><path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5.828a2 2 0 0 0-.586-1.414l-3.828-3.828A2 2 0 0 0 8.172 0H4Zm0 1.5h4v2A1.5 1.5 0 0 0 9.5 5h2v9a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5v-12a.5.5 0 0 1 .5-.5Zm5.5.56 2.44 2.44H10a.5.5 0 0 1-.5-.5V2.06ZM4.75 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"/></svg>
           </a>
       </div>
+      <a class="hero-about" href="about.html">a little more about me <span aria-hidden="true">↗</span></a>
+      </div>
+      <figure class="hero-photo-frame hero-photo-placement">
+          <button class="hero-photo-open" type="button" aria-label="Enlarge San Francisco photograph" aria-haspopup="dialog" aria-controls="home-photo-dialog">
+          <img class="hero-photo" src="images/roll-04-sf2024-22.jpg"
+               alt="Soft light over a rugged coastline, with hills and trees above the sea"
+               width="946" height="1400" decoding="async">
+          </button>
+          <figcaption class="hero-photo-caption">
+            <span>San Francisco, 2024</span>
+            <a href="photography.html">Photography <span aria-hidden="true">↗</span></a>
+          </figcaption>
+      </figure>
     </section>
   </main>
 
@@ -79,6 +97,13 @@
     </div>
   </footer>
 
-  <script src="js/script.js?v=6"></script>
+  <dialog class="home-photo-dialog" id="home-photo-dialog" aria-label="San Francisco, 2024 — enlarged photograph">
+    <button class="home-photo-close" type="button" aria-label="Close photograph" autofocus>×</button>
+    <img src="images/roll-04-sf2024-22.jpg"
+         alt="Soft light over a rugged coastline, with hills and trees above the sea"
+         width="946" height="1400">
+  </dialog>
+
+  <script src="js/script.js?v=7"></script>
 </body>
 </html>
