@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Updated: 2026-08-02 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -10,9 +9,10 @@
   <link rel="icon" href="images/favicon.png?v=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=49">
+  <link rel="stylesheet" href="css/style.css?v=53">
+  <link rel="stylesheet" href="css/projects.css?v=3">
 </head>
-<body>
+<body class="projects-page">
 
   <header class="site-header">
     <div class="container header-inner">
@@ -34,137 +34,80 @@
 
   <main>
     <div class="page-header container">
-      <!-- <p class="label">software engineering</p> -->
       <h1 class="page-title">Projects</h1>
       <p class="page-intro">
         fun side projects i've built over the past few years
       </p>
     </div>
 
-    <section class="container fade-in" style="margin-bottom: var(--space-2xl);">
-      <!-- <p class="label">selected work</p> -->
-      <div class="project-grid">
-        <div class="project-card">
-          <img class="project-image" src="images/project-tiv-archive.jpg" alt="Pixel-art illustration of a tornado in a field">
-          <div class="project-body">
-            <h3 class="project-title">TIV-archive</h3>
-            <div class="project-tags">
-              <span class="tag">Next.js</span>
-              <span class="tag">TypeScript</span>
-              <span class="tag">MapLibre GL</span>
-              <span class="tag">Supabase/PostGIS</span>
-              <span class="tag">Vercel</span>
-            </div>
-            <p class="project-desc">An interactive map of historic U.S. tornadoes — search a city, see every twister within range, and click one for its EF rating, path length, fatalities, and an animated path. A timeline slider replays tornado history using NOAA/SPC data.</p>
-            <div class="project-links">
-              <a href="https://tiv-archive-iszt.vercel.app/" target="_blank" rel="noopener">View project &rarr;</a>
-            </div>
-          </div>
-        </div>
-        <div class="project-card">
-          <img class="project-image" src="images/project-letterboxdwrapped.jpg?v=2" alt="LetterboxdWrapped logo — three overlapping circles with a rewind icon">
-          <div class="project-body">
-            <h3 class="project-title">LetterboxdWrapped</h3>
-            <div class="project-tags">
-              <span class="tag">React</span>
-              <span class="tag">Python</span>
-              <span class="tag">TMDB API</span>
-            </div>
-            <p class="project-desc">A personalized movie analytics and recommendation platform built from Letterboxd viewing and review data.</p>
-            <!-- Link TBD -->
-          </div>
-        </div>
-        <div class="project-card">
-          <img class="project-image" src="images/project-filmlogical.jpg" alt="Grid of Filmlogical Instagram post covers" style="object-position: center top;">
-          <div class="project-body">
-            <h3 class="project-title">Filmlogical</h3>
-            <div class="project-tags">
-              <span class="tag">Instagram</span>
-              <span class="tag">Photoshop</span>
-              <span class="tag">Premiere Pro</span>
-            </div>
-            <p class="project-desc">A film publication I founded and grew to 1.2k+ followers, publishing original film criticism and editorial content.</p>
-            <div class="project-links">
-              <a href="https://www.instagram.com/filmlogical/" target="_blank" rel="noopener">View project &rarr;</a>
-            </div>
-          </div>
-        </div>
-        <div class="project-card">
-          <img class="project-image" src="images/project-pipeline.jpg" alt="Pipeline icon — a cube with a rising arrow graph">
-          <div class="project-body">
-            <h3 class="project-title">Venture Pipeline Tracker</h3>
-            <div class="project-tags">
-              <span class="tag">Airtable AI</span>
-              <span class="tag">JavaScript</span>
-            </div>
-            <p class="project-desc">AI-powered internal sourcing platform with dashboards and investment pipeline analytics for venture funds.</p>
-          </div>
-        </div>
-        <div class="project-card">
-          <img class="project-image" src="images/project-thiswebsite.jpg?v=2" alt="The clover logo used across this site">
-          <div class="project-body">
-            <h3 class="project-title">This Website</h3>
-            <div class="project-tags">
-              <span class="tag">HTML</span>
-              <span class="tag">CSS</span>
-              <span class="tag">JavaScript</span>
-            </div>
-            <p class="project-desc">The site you're looking at!</p>
-            <div class="project-links">
-              <a href="https://rafafaruque.me" target="_blank" rel="noopener">View project &rarr;</a>
-            </div>
-          </div>
-        </div>
+    <section class="projects-index container" aria-label="Projects">
+      <div class="projects-index-layout">
+        <!-- Each entry owns its description, technologies, links, and preview asset. -->
+        <ul class="projects-index-list">
+          <li>
+            <article class="index-project" id="project-tiv">
+              <h2 class="index-project-title"><button class="index-preview-trigger" type="button" aria-controls="projects-preview" aria-label="Preview TIV-archive">TIV-archive</button></h2>
+              <p class="index-project-description">An interactive map of historic U.S. tornadoes, with city search, animated paths, and a timeline built on NOAA/SPC data.</p>
+              <p class="index-project-tech">Next.js · TypeScript · MapLibre GL · Supabase/PostGIS · Vercel</p>
+              <div class="index-project-action"><a class="index-project-link" href="https://tiv-archive-iszt.vercel.app/" target="_blank" rel="noopener">View project <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a> <a class="index-project-link" href="https://github.com/rafafaruque/tiv-archive" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a></div>
+              <figure class="index-project-image">
+                <img src="images/project-tiv-archive.jpg" alt="Pixel-art tornado illustration for TIV-archive" width="900" height="900" decoding="async">
+                <figcaption>TIV-archive</figcaption>
+              </figure>
+            </article>
+          </li>
+          <li>
+            <article class="index-project" id="project-letterboxd">
+              <h2 class="index-project-title"><button class="index-preview-trigger" type="button" aria-controls="projects-preview" aria-label="Preview Letterboxd Wrapped">Letterboxd Wrapped</button></h2>
+              <p class="index-project-description">Personalized movie analytics and recommendations built from Letterboxd viewing and review data.</p>
+              <p class="index-project-tech">React · Python · TMDB API</p>
+              <div class="index-project-action"><a class="index-project-link" href="https://github.com/rafafaruque/letterboxd-wrapped" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a></div>
+              <figure class="index-project-image">
+                <img src="images/project-letterboxdwrapped.jpg" alt="Letterboxd Wrapped logo with overlapping circles and a rewind symbol" width="900" height="900" decoding="async">
+                <figcaption>Letterboxd Wrapped</figcaption>
+              </figure>
+            </article>
+          </li>
+          <li>
+            <article class="index-project" id="project-filmlogical">
+              <h2 class="index-project-title"><button class="index-preview-trigger" type="button" aria-controls="projects-preview" aria-label="Preview Filmlogical">Filmlogical</button></h2>
+              <p class="index-project-description">A film publication I founded and grew to 1.2k+ followers, featuring original film criticism and editorial content.</p>
+              <p class="index-project-tech">Instagram · Photoshop · Premiere Pro</p>
+              <div class="index-project-action"><a class="index-project-link" href="https://www.instagram.com/filmlogical/" target="_blank" rel="noopener">View project <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a></div>
+              <figure class="index-project-image">
+                <img src="images/project-filmlogical.jpg" alt="A selection of published Filmlogical film editorial covers" width="757" height="1000" decoding="async">
+                <figcaption>Filmlogical</figcaption>
+              </figure>
+            </article>
+          </li>
+          <li>
+            <article class="index-project" id="project-pipeline">
+              <h2 class="index-project-title"><button class="index-preview-trigger" type="button" aria-controls="projects-preview" aria-label="Preview Venture Pipeline Tracker">Venture Pipeline Tracker</button></h2>
+              <p class="index-project-description">An AI-powered internal sourcing platform with dashboards and investment pipeline analytics for venture funds.</p>
+              <p class="index-project-tech">Airtable AI · JavaScript</p>
+              <figure class="index-project-image">
+                <img src="images/project-pipeline.jpg" alt="Existing Venture Pipeline Tracker logo" width="900" height="900" decoding="async">
+                <figcaption>Venture Pipeline Tracker</figcaption>
+              </figure>
+            </article>
+          </li>
+          <li>
+            <article class="index-project" id="project-website">
+              <h2 class="index-project-title"><button class="index-preview-trigger" type="button" aria-controls="projects-preview" aria-label="Preview This Website">This Website</button></h2>
+              <p class="index-project-description">My personal website — a home for the things I build, photograph, and write.</p>
+              <p class="index-project-tech">HTML · CSS · JavaScript</p>
+              <div class="index-project-action"><a class="index-project-link" href="https://rafafaruque.me" target="_blank" rel="noopener">View project <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a> <a class="index-project-link" href="https://github.com/rafafaruque/portfolio" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span><span class="projects-sr-only"> (opens in a new tab)</span></a></div>
+              <figure class="index-project-image">
+                <img src="images/project-thiswebsite.jpg" alt="The green clover logo used on this website" width="900" height="889" decoding="async">
+                <figcaption>This Website</figcaption>
+              </figure>
+            </article>
+          </li>
+        </ul>
+        <aside class="projects-preview" id="projects-preview" aria-hidden="true"></aside>
       </div>
     </section>
 
-    <section class="container fade-in" style="margin-bottom: var(--space-2xl);">
-      <p class="label">skills</p>
-      <div class="skills-grid">
-        <div>
-          <p class="skill-group-title">languages</p>
-          <div class="tag-list">
-            <span class="tag">Java</span>
-            <span class="tag">Python</span>
-            <span class="tag">TypeScript</span>
-            <span class="tag">C/C++</span>
-            <span class="tag">PHP/Hack</span>
-            <span class="tag">OCaml</span>
-            <span class="tag">PostgreSQL</span>
-            <span class="tag">JavaScript</span>
-            <span class="tag">HTML/CSS</span>
-            <span class="tag">R</span>
-          </div>
-        </div>
-        <div>
-          <p class="skill-group-title">frameworks</p>
-          <div class="tag-list">
-            <span class="tag">Next.js</span>
-            <span class="tag">React</span>
-            <span class="tag">GraphQL</span>
-            <span class="tag">Node.js</span>
-            <span class="tag">Django</span>
-            <span class="tag">FastAPI</span>
-            <span class="tag">Docker</span>
-            <span class="tag">deck.gl</span>
-          </div>
-        </div>
-        <div>
-          <p class="skill-group-title">tools</p>
-          <div class="tag-list">
-            <span class="tag">Git</span>
-            <span class="tag">kdb+/q</span>
-            <span class="tag">pandas</span>
-            <span class="tag">Tableau</span>
-            <span class="tag">PostgreSQL/PostGIS</span>
-            <span class="tag">pgvector</span>
-            <span class="tag">Supabase</span>
-            <span class="tag">Neon</span>
-            <span class="tag">Vercel</span>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer">
@@ -174,5 +117,6 @@
   </footer>
 
   <script src="js/script.js?v=6"></script>
+  <script src="js/projects.js?v=1"></script>
 </body>
 </html>

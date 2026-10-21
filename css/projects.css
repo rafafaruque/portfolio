@@ -1,0 +1,194 @@
+/* Projects only: the homepage palette, with an editorial index. */
+.projects-page {
+  --paper: #FCFBF8;
+}
+
+.projects-page .site-header {
+  background: rgba(252, 251, 248, 0.88);
+}
+
+.projects-page .page-header {
+  padding-top: clamp(3.5rem, 7vw, 6rem);
+  padding-bottom: 3rem;
+  padding-inline: var(--space-md);
+}
+
+.projects-page .page-title {
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.875rem;
+}
+
+.projects-page .page-intro {
+  font-size: 1rem;
+}
+
+.projects-index {
+  margin-bottom: 4rem;
+}
+
+.projects-index-list {
+  min-width: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.index-project {
+  padding: 1.75rem 0 2rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.index-project-title {
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.035em;
+  margin-bottom: 0.75rem;
+}
+
+.index-preview-trigger {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.index-preview-trigger:focus-visible,
+.index-project-link:hover {
+  color: var(--safelight-dim);
+}
+
+.index-preview-trigger:disabled {
+  cursor: default;
+  color: inherit;
+}
+
+.index-project-description {
+  max-width: 55ch;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.index-project-tech {
+  margin-top: 0.875rem;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  line-height: 1.9;
+  color: var(--ink-muted);
+}
+
+.index-project-action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+}
+
+.index-project-link {
+  color: var(--safelight-dim);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+}
+
+.index-project-image {
+  margin: 1.5rem 0 0;
+}
+
+.index-project-image img {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.index-project-image figcaption {
+  display: none;
+}
+
+.projects-preview {
+  display: none;
+}
+
+.projects-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Hover previews are progressive enhancement; touch and no-JS keep images inline. */
+@media (min-width: 981px) and (hover: hover) and (pointer: fine) {
+  .index-project.is-active .index-preview-trigger {
+    color: var(--safelight-dim);
+  }
+
+  .projects-enhanced .projects-index-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(3rem, 6vw, 5rem);
+    align-items: start;
+  }
+
+  .projects-enhanced .projects-preview {
+    display: block;
+    position: relative;
+    width: 100%;
+    max-width: 390px;
+    justify-self: center;
+    aspect-ratio: 1 / 1.12;
+    min-width: 0;
+    margin-top: calc(1.75rem + 1px);
+  }
+
+  .projects-enhanced .projects-index-list .index-project-image {
+    display: none;
+  }
+
+  .projects-preview .index-project-image {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 225ms ease;
+    pointer-events: none;
+  }
+
+  .projects-preview .index-project-image.is-active {
+    opacity: 1;
+  }
+
+  .projects-preview img {
+    min-height: 0;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-position: center top;
+  }
+}
+
+/* Only pin the preview when the viewport comfortably contains it. */
+@media (min-width: 981px) and (min-height: 800px) and (hover: hover) and (pointer: fine) {
+  .projects-enhanced .projects-preview {
+    position: sticky;
+    top: 112px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-preview .index-project-image {
+    transition: none;
+  }
+}
