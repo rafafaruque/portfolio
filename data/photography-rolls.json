@@ -1,5 +1,182 @@
 [
   {
+    "id": "roll-13-acadia",
+    "title": "Acadia National Park 2026",
+    "details": "Fujifilm X100VI",
+    "photos": [
+      {
+        "src": "images/roll-13-acadia.jpg",
+        "alt": "A person beside a lake under shoreline trees",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-1.jpg",
+        "alt": "An autumn woodland path beneath golden leaves",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-2.jpg",
+        "alt": "Friends beside a lake among the trees",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-3.jpg",
+        "alt": "Friends hiking a rocky trail through autumn foliage",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-4.jpg",
+        "alt": "Two friends standing at a scenic overlook",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-5.jpg",
+        "alt": "A lake surrounded by autumn hills",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-6.jpg",
+        "alt": "Hikers climbing a wooded trail in sunlight",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-7.jpg",
+        "alt": "Sunlight over autumn hills and distant water",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-8.jpg",
+        "alt": "A hiker on a rocky cliffside trail",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-9.jpg",
+        "alt": "Sunlight filtering through red and gold leaves",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-10.jpg",
+        "alt": "Hikers climbing a steep rocky trail above the coast",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-11.jpg",
+        "alt": "A hiker overlooking the coast and islands",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-12.jpg",
+        "alt": "A coastal panorama framed by autumn trees",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-13.jpg",
+        "alt": "Friends on a wooded hiking trail",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-14.jpg",
+        "alt": "A person sitting on a stone trail marker",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-15.jpg",
+        "alt": "Coastal islands seen from a mountain overlook",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-16.jpg",
+        "alt": "Hikers on a rocky forest path in autumn",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-17.jpg",
+        "alt": "A waterfront building with yellow umbrellas",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-18.jpg",
+        "alt": "Boats in a harbor beneath a clear blue sky",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-19.jpg",
+        "alt": "Sunrise over distant hills and water",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-20.jpg",
+        "alt": "A rocky shoreline framed by evergreen trees",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-21.jpg",
+        "alt": "People looking out over the ocean from coastal rocks",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-22.jpg",
+        "alt": "Waves beside a rugged rocky coastline",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-23.jpg",
+        "alt": "Two people sitting on rocks beside the ocean",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-24.jpg",
+        "alt": "A rocky bay and tree-covered headland",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-25.jpg",
+        "alt": "A person standing on coastal rocks above the water",
+        "width": 2400,
+        "height": 1600
+      },
+      {
+        "src": "images/roll-13-acadia-26.jpg",
+        "alt": "A rocky shoreline bordered by evergreen forest",
+        "width": 1600,
+        "height": 2400
+      },
+      {
+        "src": "images/roll-13-acadia-27.jpg",
+        "alt": "A person sitting beside the sunlit ocean",
+        "width": 2400,
+        "height": 1600
+      }
+    ],
+    "coverPosition": "center",
+    "coverIndex": 5
+  },
+  {
     "id": "roll-01-nyc",
     "title": "NYC 2025 - 2026",
     "details": "Canon AE-1, Fujifilm 400",

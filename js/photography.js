@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let rootOverflow;
   let lightboxScroll;
 
+  // A reload starts at the overview; discard any stale modal-only history state.
+  if (history.state?.photographyLightbox) {
+    const { photographyLightbox, ...pageState } = history.state;
+    history.replaceState(pageState, '');
+  }
+
   // Pack in source order into the shortest column using known image dimensions.
   // No image-load measurement or DOM reordering is needed.
   const layoutPhotographs = () => {
@@ -90,9 +96,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     enlarged.src = photo.src;
     counter.textContent = `${currentIndex + 1} / ${currentRoll.photos.length}`;
     dialog.setAttribute('aria-label', `${currentRoll.title} — photograph ${counter.textContent}`);
+    if (dialog.open) {
+      history.replaceState({ ...history.state, photographyLightbox: { rollId: currentRoll.id, index: currentIndex } }, '');
+    }
   };
 
-  const openPhoto = (index, button) => {
+  const openPhoto = (index, button, addHistory = true) => {
     photoFocus = button;
     lightboxScroll = window.scrollY;
     bodyStyle = document.body.style.cssText;
@@ -103,6 +112,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.style.width = '100%';
     document.documentElement.style.overflow = 'hidden';
     dialog.showModal();
+    if (addHistory) {
+      history.pushState({ ...history.state, photographyLightbox: { rollId: currentRoll.id, index: currentIndex } }, '');
+    }
   };
 
   const openRoll = (roll, button) => {
@@ -143,13 +155,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const figure = document.createElement('figure');
     const frame = document.createElement('div');
     frame.className = 'archive-cover-image';
-    const coverImage = image(roll.photos[0], '(max-width: 479px) calc(100vw - 52px), (max-width: 980px) 45vw, (max-width: 1199px) 30vw, 260px', index < 4);
+    const coverImage = image(roll.photos[roll.coverIndex || 0], '(max-width: 479px) calc(100vw - 52px), (max-width: 980px) 45vw, (max-width: 1199px) 30vw, 260px', index < 4);
     coverImage.style.objectPosition = roll.coverPosition || 'center';
     frame.appendChild(coverImage);
     const number = document.createElement('span');
     number.className = 'archive-frame-number';
     number.setAttribute('aria-hidden', 'true');
-    number.textContent = roll.id.split('-')[1];
+    number.textContent = String(index + 1);
     frame.appendChild(number);
     const caption = document.createElement('figcaption');
     const name = document.createElement('span');
@@ -192,5 +204,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.documentElement.style.overflow = rootOverflow;
     window.scrollTo({ top: lightboxScroll, behavior: 'instant' });
     photoFocus.focus({ preventScroll: true });
+    // Button, Escape, and backdrop dismissals consume the same history entry as Back.
+    if (history.state?.photographyLightbox) history.back();
+  });
+
+  window.addEventListener('popstate', (event) => {
+    const photo = event.state?.photographyLightbox;
+    if (!photo) {
+      if (dialog.open) dialog.close();
+      return;
+    }
+    // Forward can restore the last enlarged photo without adding another entry.
+    const roll = rolls.find((item) => item.id === photo.rollId);
+    if (!roll || !roll.photos[photo.index]) return;
+    if (currentRoll !== roll || collection.hidden) {
+      openRoll(roll, covers[rolls.indexOf(roll)].querySelector('button'));
+    }
+    if (!dialog.open) openPhoto(photo.index, gallery.children[photo.index].querySelector('button'), false);
   });
 });
